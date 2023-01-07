@@ -1,3 +1,4 @@
 attrs==22.2.0
+numpy==1.24.1
 pygame==2.1.2
 PyYAML==6.0

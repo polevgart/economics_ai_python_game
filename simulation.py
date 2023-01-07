@@ -47,13 +47,15 @@ class Simulator:
 
         turn_desc = self.simulation_hist.get_step(self.cur_step)
         self.cur_step += 1
-
         if turn_desc is not None:
             return turn_desc
 
-        state = self.board.get_state()
+        state = self.board.get_state_ref()
         move_kind2player__move = collections.defaultdict(list)
         for player, strategy in zip(self.players, self.strategies):
+            if not player.is_alive:
+                continue
+
             try:
                 move = strategy.get_next_move(copy.deepcopy(state))
             except Exception:

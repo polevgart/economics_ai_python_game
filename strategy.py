@@ -42,12 +42,10 @@ class Shoot(BaseMove):
         assert self.dx == 0 and self.dy in (1, -1) or self.dy == 0 and self.dx in (1, -1)
 
 
+@attr.s(slots=True, kw_only=True)
 class BaseStrategy:
-    def get_next_move(self, state: State) -> BaseMove:
-        raise NotImplementedError()
+    player_name: str = attr.ib()
 
-
-class RandomStrategy(BaseStrategy):
     _possible_moves = [
         DirectMove(dx=dx, dy=dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)
     ] + [
@@ -57,6 +55,11 @@ class RandomStrategy(BaseStrategy):
         Shoot(dx=0, dy=1),
     ]
 
+    def get_next_move(self, state: State) -> BaseMove:
+        raise NotImplementedError()
+
+
+class RandomStrategy(BaseStrategy):
     def get_next_move(self, state: State) -> BaseMove:
         return random.choice(self._possible_moves)
 
