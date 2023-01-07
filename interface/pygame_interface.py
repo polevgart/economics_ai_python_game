@@ -5,6 +5,9 @@ from rules import *
 from simulation import Simulator
 
 
+MAX_FPS = 30
+
+
 @attr.s(slots=True, kw_only=True)
 class PygameInterface:
     board: Board = attr.ib()
@@ -57,7 +60,8 @@ class PygameInterface:
         }
 
 
-    def start_loop(self):
+    def start_loop(self, autorun=True, fps=3):
+        clock = pygame.time.Clock()
         running = True
         while running:
             next_step = False
@@ -71,19 +75,28 @@ class PygameInterface:
                                 running = False
                             case pygame.K_RETURN | pygame.K_n:
                                 next_step = True
+                                autorun = False
+                            case pygame.K_SPACE:
+                                autorun = not autorun
+                            case pygame.K_a:
+                                fps = max(1, fps - 1)
+                            case pygame.K_s:
+                                fps = min(MAX_FPS, fps + 1)
 
-            self.screen.fill("black")
+            if autorun:
+                clock.tick(fps)
+                next_step = True
 
             if next_step and not self.simulator.is_endgame:
                 self.simulator.step()
 
             self.render()
-            # Flip the display
             pygame.display.flip()
 
         pygame.quit()
 
     def render(self):
+        self.screen.fill("black")
         for board_y in range(self.board.size_y):
             for board_x in range(self.board.size_x):
                 cell = self.board.get_cell(board_x, board_y)
