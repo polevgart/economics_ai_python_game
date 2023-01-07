@@ -5,6 +5,7 @@ import pickle
 import yaml
 
 from interface import CliInterface, PygameInterface
+from perceptron import NeuralStrategy
 from rules import Board
 from simulation import Simulator, SimulationHistory
 from strategy import *
@@ -46,10 +47,10 @@ def main():
     simulator = Simulator(
         board=board,
         strategies=[
-            RandomStrategy(),
-            RandomStrategy(),
-            RandomStrategy(),
-            RandomStrategy(),
+            NeuralStrategy(player_name=board.player_names[0]),
+            NeuralStrategy(player_name=board.player_names[1]),
+            NeuralStrategy(player_name=board.player_names[2]),
+            NeuralStrategy(player_name=board.player_names[3]),
         ],
         num_of_steps=2000,
         simulation_hist=simulation_hist,

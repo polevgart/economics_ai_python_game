@@ -261,9 +261,9 @@ class Board:
             player.move(dx, dy)
             self.set_cell(player.x, player.y, player)
 
-    def get_state(self) -> State:
+    def get_state_ref(self) -> State:
         # cut out a square of const radius centered at the player which requested the state
-        return State(cells=self.cells)  # deepcopy here, not the whole board
+        return State(cells=self.cells)
 
 
 class Spawner:
