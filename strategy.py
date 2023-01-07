@@ -21,7 +21,7 @@ class BaseMove:
 
 @attr.s(slots=True, kw_only=True)
 class DirectMove(BaseMove):
-    """Направления движения. Можно стоять на место
+    """Направления движения. Можно стоять на месте
     """
     dx: int = attr.ib()
     dy: int = attr.ib()
@@ -56,7 +56,6 @@ class RandomStrategy(BaseStrategy):
         Shoot(dx=0, dy=-1),
         Shoot(dx=0, dy=1),
     ]
-
 
     def get_next_move(self, state: State) -> BaseMove:
         return random.choice(self._possible_moves)

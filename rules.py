@@ -1,13 +1,14 @@
 import attr
+import functools
+from pathlib import Path
 import random
 import typing
-import functools
 
 
 __all__ = (
     "Player",
-    "Bonus",
     "Wall",
+    "Bonus",
     "HealBonus",
     "PoisonBonus",
     "ScoreBonus",
@@ -129,7 +130,7 @@ class PoisonBonus(Bonus):
 
 @attr.s(slots=True, kw_only=True)
 class State:
-    cells: list[list[BaseObject]] = attr.ib()
+    cells: list[list[typing.Optional[BaseObject]]] = attr.ib()
 
 
 @attr.s(slots=True, kw_only=True)
@@ -137,10 +138,12 @@ class Board:
     size_x: int = attr.ib()
     size_y: int = attr.ib()
     num_of_items: int = attr.ib()
-    cells: list[list[typing.Optional[BaseObject]]] = attr.ib(default=None, init=False)
     num_of_players: int = attr.ib()
-    players: list[Player] = attr.ib(default=None, init=False)
     max_health: int = attr.ib()
+    level_map_path: typing.Optional[str | Path] = attr.ib(default=None)
+
+    cells: list[list[typing.Optional[BaseObject]]] = attr.ib(default=None, init=False)
+    players: list[Player] = attr.ib(default=None, init=False)
 
     def __attrs_post_init__(self):
         self.restart()
@@ -157,7 +160,32 @@ class Board:
 
         return x, y
 
-    def restart(self):
+    def _load_level_map(self):
+        self.cells = []
+        with open(self.level_map_path, 'r') as file:
+            for line in file:
+                line = line.rstrip()
+                if line:
+                    row = [
+                        None if char == '.' else Wall()
+                        for char in line
+                    ]
+                    self.cells.append(row)
+
+        self.size_x = max(map(len, self.cells))
+        for row in self.cells:
+            row.extend([Wall()] * (self.size_x - len(row)))
+        self.size_y = len(self.cells)
+
+    def _generate_walls(self):
+        if self.level_map_path is not None:
+            try:
+                self._load_level_map()
+                return
+            except OSError:
+                # log?
+                pass
+
         self.cells = [[None] * self.size_x for _ in range(self.size_y)]
         self.cells[0] = [Wall()] * self.size_x
         self.cells[-1] = [Wall()] * self.size_x
@@ -165,6 +193,7 @@ class Board:
             self.cells[i][0] = Wall()
             self.cells[i][-1] = Wall()
 
+    def _generate_players(self):
         self.players = []
         for _ in range(self.num_of_players):
             x, y = self.get_rand_coord_empty_cell()
@@ -172,9 +201,15 @@ class Board:
             self.set_cell(x, y, player)
             self.players.append(player)
 
+    def _generate_items(self):
         for i in range(self.num_of_items):
             x, y = self.get_rand_coord_empty_cell()
             self.set_cell(x, y, Spawner.spawn())
+
+    def restart(self):
+        self._generate_walls()
+        self._generate_players()
+        self._generate_items()
 
     def get_cell(self, x, y):
         return self.cells[y][x]
@@ -209,19 +244,16 @@ class Board:
             self.set_cell(player.x, player.y, player)
 
     def get_state(self) -> State:
-        return State(cells=self.cells)
+        # cut out a square of const radius centered at the player which requested the state
+        return State(cells=self.cells)  # deepcopy here, not the whole board
 
 
 class Spawner:
-    items__probs = tuple(
-        zip(
-            *(
-                (PoisonBonus, 1),
-                (HealBonus, 1),
-                (ScoreBonus, 1),
-            )
-        )
-    )
+    items__probs = tuple(zip(*{
+        PoisonBonus: 1,
+        HealBonus: 1,
+        ScoreBonus: 1,
+    }.items()))
 
     @classmethod
     def spawn(cls) -> Item:

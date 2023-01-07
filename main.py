@@ -13,6 +13,7 @@ def main():
         num_of_items=20,
         num_of_players=4,
         max_health=2,
+        level_map_path='maps/level.txt',
     )
     simulator = Simulator(
         board=board,
@@ -31,8 +32,8 @@ def main():
     renderer = PygameInterface(
         board=board,
         simulator=simulator,
-        screen_width=500,
-        screen_height=500,
+        screen_width=1000,
+        screen_height=800,
         border_x=5,
         border_y=5,
         border_between_cells=5,
