@@ -1,10 +1,11 @@
 import attr
+import copy
 import numpy as np
 import numpy.typing as npt
 import random
 import typing
 
-from gen_algo import Individual
+from genetic import Individual
 from rules import *
 from rules import BaseObject
 from strategy import BaseMove, BaseStrategy
@@ -67,7 +68,7 @@ class NeuralStrategy(BaseStrategy, Individual):
     perceptron: Perceptron = attr.ib(factory=lambda: Perceptron(input_size=800, output_size=13))
 
     def encode_cell(self, cell: BaseObject | None) -> list[float]:
-        match cell:
+        match cell:  # noqa
             case Wall():
                 return [1, 0, 0, 0, 0] + [0, 0, 0]
             case HealBonus():
@@ -101,7 +102,15 @@ class NeuralStrategy(BaseStrategy, Individual):
         return move
 
     def mutate(self):
-        ...
+        prob = 0.3
+        for layer in self.perceptron.weights:
+            mask = np.random.random(layer.shape) < prob
+            diff = np.random.normal(size=layer.shape)
+            layer[mask] += diff[mask]
 
-    def crossover(self, other: 'NeuralStrategy'):
-        ...
+    def crossover(self, other: 'NeuralStrategy') -> 'NeuralStrategy':
+        child = copy.deepcopy(self)
+        for i, (layer, other_layer) in enumerate(zip(self.perceptron.weights, other.perceptron.weights)):
+            child.perceptron.weights[i] = (layer + other_layer) / 2
+
+        return child

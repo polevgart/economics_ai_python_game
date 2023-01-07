@@ -1,6 +1,5 @@
 import attr
 import random
-import typing
 
 from rules import State
 

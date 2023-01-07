@@ -60,6 +60,7 @@ class Simulator:
                 move = strategy.get_next_move(copy.deepcopy(state))
             except Exception:
                 logger.exception("Error in get_next_move")
+                raise
                 continue
 
             if not isinstance(move, BaseMove):
@@ -87,7 +88,11 @@ class Simulator:
         for player_name, move in direct_moves:
             self.board.handle_direct_move(player_name, move.dx, move.dy)
 
+    def finish_step(self):
+        self.board.recharge_items()
+
     def step(self):
         turn_desc = self.generate_moves()
         self.handle_shoots(turn_desc.shoots)
         self.handle_direct_moves(turn_desc.direct_moves)
+        self.finish_step()

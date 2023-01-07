@@ -1,0 +1,23 @@
+Board:
+  size_x: 10
+  size_y: 10
+  num_of_items: 10
+  max_health: 10
+  level_map_path: "maps/level10x10.txt"
+  player_names:
+  - cock
+  - shmara
+  - david
+  - guzeeva
+
+GeneticAlgorithm:
+  max_generations: 100
+  population_size: 20
+  num_of_children: 8
+  mutate_prob: 0.3
+
+Simulator:
+  num_of_steps: 100
+
+dump_pickle:
+  NeuralStrategy: "NeuralStrategy.pickle"
