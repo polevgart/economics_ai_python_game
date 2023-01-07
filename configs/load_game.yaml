@@ -1,0 +1,9 @@
+load_pickle:
+  SimulationHistory: "SimulationHistory.pickle"
+
+PygameInterface:
+  screen_width: 1000
+  screen_height: 800
+  border_x: 5
+  border_y: 5
+  border_between_cells: 5

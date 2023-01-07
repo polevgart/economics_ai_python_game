@@ -1,20 +1,48 @@
+import argparse
+import copy
 import logging
+import pickle
+import yaml
 
 from interface import CliInterface, PygameInterface
 from rules import Board
-from simulation import Simulator
+from simulation import Simulator, SimulationHistory
 from strategy import *
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", required=True, help="Path to yaml config")
+    return parser.parse_args()
+
+
+def load_pickle_or_init(config, cls: type):
+    pickle_filename = config.get("load_pickle", {}).get(cls.__name__)
+    if not pickle_filename:
+        return cls(**config.get(cls.__name__, {}))
+
+    with open(pickle_filename, "rb") as fin:
+        return pickle.load(fin)
+
+
+def dump_pickle_if_need(config, object):
+    pickle_filename = config.get("dump_pickle", {}).get(object.__class__.__name__)
+    if not pickle_filename:
+        return
+
+    with open(pickle_filename, "wb") as fout:
+        pickle.dump(object, fout)
+
+
 def main():
-    board = Board(
-        size_x=10,
-        size_y=10,
-        num_of_items=20,
-        num_of_players=4,
-        max_health=2,
-        level_map_path='maps/level.txt',
-    )
+    args = parse_args()
+    with open(args.config) as fin:
+        config = yaml.safe_load(fin)
+
+    simulation_hist = load_pickle_or_init(config, SimulationHistory)
+    simulation_hist.initial_board = simulation_hist.initial_board or Board(**config["Board"])
+    board = copy.deepcopy(simulation_hist.initial_board)
+
     simulator = Simulator(
         board=board,
         strategies=[
@@ -24,6 +52,7 @@ def main():
             RandomStrategy(),
         ],
         num_of_steps=2000,
+        simulation_hist=simulation_hist,
     )
     # renderer = CliInterface(
     #     board=board,
@@ -32,13 +61,10 @@ def main():
     renderer = PygameInterface(
         board=board,
         simulator=simulator,
-        screen_width=1000,
-        screen_height=800,
-        border_x=5,
-        border_y=5,
-        border_between_cells=5,
+        **config["PygameInterface"]
     )
     renderer.start_loop()
+    dump_pickle_if_need(config, simulator.simulation_hist)
 
 
 if __name__ == "__main__":

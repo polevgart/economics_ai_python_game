@@ -6,6 +6,7 @@ import typing
 
 
 __all__ = (
+    "PlayerName",
     "Player",
     "Wall",
     "Bonus",
@@ -30,8 +31,13 @@ def only_if_alive(func):
     return wrapped
 
 
+class PlayerName(str):
+    pass
+
+
 @attr.s(slots=True, kw_only=True)
 class Player(BaseObject):
+    name: PlayerName = attr.ib()
     x: int = attr.ib()
     y: int = attr.ib()
 
@@ -133,17 +139,21 @@ class State:
     cells: list[list[typing.Optional[BaseObject]]] = attr.ib()
 
 
+class PlayerNotFoundError(Exception):
+    pass
+
+
 @attr.s(slots=True, kw_only=True)
 class Board:
     size_x: int = attr.ib()
     size_y: int = attr.ib()
     num_of_items: int = attr.ib()
-    num_of_players: int = attr.ib()
     max_health: int = attr.ib()
     level_map_path: typing.Optional[str | Path] = attr.ib(default=None)
 
     cells: list[list[typing.Optional[BaseObject]]] = attr.ib(default=None, init=False)
-    players: list[Player] = attr.ib(default=None, init=False)
+    _name2player: dict[PlayerName, Player] = attr.ib(factory=dict, init=False)
+    player_names: list[PlayerName] = attr.ib()
 
     def __attrs_post_init__(self):
         self.restart()
@@ -159,6 +169,13 @@ class Board:
             x, y = self.get_rand_coord()
 
         return x, y
+
+    def get_player(self, player_name: PlayerName, strict=True) -> Player | None:
+        player = self._name2player.get(player_name)
+        if player is None and strict:
+            raise PlayerNotFoundError(f"Player {player_name} undefined")
+
+        return player
 
     def _load_level_map(self):
         self.cells = []
@@ -194,12 +211,11 @@ class Board:
             self.cells[i][-1] = Wall()
 
     def _generate_players(self):
-        self.players = []
-        for _ in range(self.num_of_players):
+        for name in self.player_names:
             x, y = self.get_rand_coord_empty_cell()
-            player = Player(x=x, y=y, max_health=self.max_health)
+            player = self.get_player(name, strict=False) or Player(name=name, x=x, y=y, max_health=self.max_health)
             self.set_cell(x, y, player)
-            self.players.append(player)
+            self._name2player[name] = player
 
     def _generate_items(self):
         for i in range(self.num_of_items):
@@ -223,7 +239,8 @@ class Board:
     def can_move_to(self, x, y):
         return not isinstance(self.get_cell(x, y), (Player, Wall))
 
-    def handle_shoot(self, player, dx, dy):
+    def handle_shoot(self, player_name: PlayerName, dx: int, dy: int):
+        player = self.get_player(player_name)
         x = player.x + dx
         y = player.y + dy
         while self.can_move_to(x, y):
@@ -235,7 +252,8 @@ class Board:
             cell.damage(1)
             player.change_score(1)
 
-    def handle_direct_move(self, player, dx, dy):
+    def handle_direct_move(self, player_name: PlayerName, dx: int, dy: int):
+        player = self.get_player(player_name)
         x = player.x + dx
         y = player.y + dy
         if self.can_move_to(x, y):

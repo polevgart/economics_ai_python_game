@@ -1,0 +1,21 @@
+Board:
+  size_x: 10
+  size_y: 10
+  num_of_items: 20
+  max_health: 2
+  level_map_path: "maps/level.txt"
+  player_names:
+  - cock
+  - shmara
+  - david
+  - guzeeva
+
+PygameInterface:
+  screen_width: 1000
+  screen_height: 800
+  border_x: 5
+  border_y: 5
+  border_between_cells: 5
+
+dump_pickle:
+  SimulationHistory: "SimulationHistory.pickle"
