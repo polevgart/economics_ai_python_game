@@ -148,6 +148,7 @@ class Board:
     size_x: int = attr.ib()
     size_y: int = attr.ib()
     num_of_items: int = attr.ib()
+    available_items: int = attr.ib(default=0)
     max_health: int = attr.ib()
     level_map_path: typing.Optional[str | Path] = attr.ib(default=None)
 
@@ -217,15 +218,20 @@ class Board:
             self.set_cell(x, y, player)
             self._name2player[name] = player
 
-    def _generate_items(self):
-        for i in range(self.num_of_items):
+    def _generate_items(self, count):
+        for i in range(count):
             x, y = self.get_rand_coord_empty_cell()
             self.set_cell(x, y, Spawner.spawn())
+
+        self.available_items += count
+
+    def recharge_items(self):
+        self._generate_items(self.num_of_items - self.available_items)
 
     def restart(self):
         self._generate_walls()
         self._generate_players()
-        self._generate_items()
+        self._generate_items(self.num_of_items)
 
     def get_cell(self, x, y):
         return self.cells[y][x]
@@ -259,6 +265,10 @@ class Board:
         if self.can_move_to(x, y):
             self.set_cell(player.x, player.y, None)
             player.move(dx, dy)
+            cell = self.get_cell(player.x, player.y)
+            if cell is not None:
+                cell.pick(player)
+                self.available_items -= 1
             self.set_cell(player.x, player.y, player)
 
     def get_state_ref(self) -> State:
@@ -269,8 +279,8 @@ class Board:
 class Spawner:
     items__probs = tuple(zip(*{
         PoisonBonus: 1,
-        HealBonus: 1,
-        ScoreBonus: 1,
+        HealBonus: 2,
+        ScoreBonus: 5,
     }.items()))
 
     @classmethod

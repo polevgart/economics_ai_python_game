@@ -1,52 +1,34 @@
-import argparse
 import copy
 import logging
-import pickle
-import yaml
 
-from interface import CliInterface, PygameInterface
+import util as lib_util
+
+from interface import CliInterface, PygameInterface  # noqa: F401
 from perceptron import NeuralStrategy
 from rules import Board
 from simulation import Simulator, SimulationHistory
-from strategy import *
+from strategy import *  # noqa
 
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", required=True, help="Path to yaml config")
-    return parser.parse_args()
-
-
-def load_pickle_or_init(config, cls: type):
-    pickle_filename = config.get("load_pickle", {}).get(cls.__name__)
-    if not pickle_filename:
-        return cls(**config.get(cls.__name__, {}))
-
-    with open(pickle_filename, "rb") as fin:
-        return pickle.load(fin)
-
-
-def dump_pickle_if_need(config, object):
-    pickle_filename = config.get("dump_pickle", {}).get(object.__class__.__name__)
-    if not pickle_filename:
-        return
-
-    with open(pickle_filename, "wb") as fout:
-        pickle.dump(object, fout)
+logger = logging.getLogger(__name__)
 
 
 def main():
-    args = parse_args()
-    with open(args.config) as fin:
-        config = yaml.safe_load(fin)
+    config = lib_util.get_config()
 
-    simulation_hist = load_pickle_or_init(config, SimulationHistory)
+    simulation_hist = lib_util.load_pickle_or_init(config, SimulationHistory)
     simulation_hist.initial_board = simulation_hist.initial_board or Board(**config["Board"])
     board = copy.deepcopy(simulation_hist.initial_board)
 
+    strategy = lib_util.load_pickle(config, NeuralStrategy)
+    strategies = []
+    for i in range(4):
+        named_strategy = copy.deepcopy(strategy)
+        named_strategy.player_name = board.player_names[i]
+        strategies.append(named_strategy)
+
     simulator = Simulator(
         board=board,
-        strategies=[
+        strategies=strategies or [
             NeuralStrategy(player_name=board.player_names[0]),
             NeuralStrategy(player_name=board.player_names[1]),
             NeuralStrategy(player_name=board.player_names[2]),
@@ -64,8 +46,8 @@ def main():
         simulator=simulator,
         **config["PygameInterface"]
     )
-    renderer.start_loop()
-    dump_pickle_if_need(config, simulator.simulation_hist)
+    renderer.start_loop(autorun=False)
+    lib_util.dump_pickle_if_need(config, simulator.simulation_hist)
 
 
 if __name__ == "__main__":

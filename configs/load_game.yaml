@@ -1,5 +1,6 @@
 load_pickle:
-  SimulationHistory: "SimulationHistory.pickle"
+  # SimulationHistory: "SimulationHistory.pickle"
+  NeuralStrategy: "NeuralStrategy.pickle"
 
 PygameInterface:
   screen_width: 1000
@@ -7,3 +8,15 @@ PygameInterface:
   border_x: 5
   border_y: 5
   border_between_cells: 5
+
+Board:
+  size_x: 10
+  size_y: 10
+  num_of_items: 20
+  max_health: 2
+  level_map_path: "maps/level10x10.txt"
+  player_names:
+  - cock
+  - shmara
+  - david
+  - guzeeva
