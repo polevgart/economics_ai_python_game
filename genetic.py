@@ -4,10 +4,10 @@ from tqdm.auto import tqdm
 
 
 class Individual:
-    def mutate(self) -> 'Individual':
+    def mutate(self) -> "Individual":
         raise NotImplementedError()
 
-    def crossover(self, other: 'Individual') -> 'Individual':
+    def crossover(self, other: "Individual") -> "Individual":
         raise NotImplementedError()
 
 

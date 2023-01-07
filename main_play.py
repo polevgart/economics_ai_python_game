@@ -44,7 +44,7 @@ def main():
     renderer = PygameInterface(
         board=board,
         simulator=simulator,
-        **config["PygameInterface"]
+        **config["PygameInterface"],
     )
     renderer.start_loop(autorun=False)
     lib_util.dump_pickle_if_need(config, simulator.simulation_hist)

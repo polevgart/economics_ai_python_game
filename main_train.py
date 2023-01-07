@@ -30,7 +30,7 @@ class GeneticAlgorithm(genetic.GeneticAlgorithm):
             simulator = Simulator(
                 board=board,
                 strategies=sample,
-                **self.config["Simulator"]
+                **self.config["Simulator"],
             )
             while not simulator.is_endgame:
                 simulator.step()
@@ -51,11 +51,11 @@ def main():
     genetic_algorithm = GeneticAlgorithm(
         individual_factory=individual_factory,
         config=config,
-        **config["GeneticAlgorithm"]
+        **config["GeneticAlgorithm"],
     )
     individual = genetic_algorithm.run()
     lib_util.dump_pickle_if_need(config, individual)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
