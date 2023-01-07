@@ -1,11 +1,9 @@
 import logging
 
+from interface import CliInterface, PygameInterface
 from rules import Board
-from strategy import *
 from simulation import Simulator
-from cli import CliInterface
-from pygame_interface import PygameInterface
-
+from strategy import *
 
 
 def main():
