@@ -43,7 +43,7 @@ class Shoot(BaseMove):
 
 @attr.s(slots=True, kw_only=True)
 class BaseStrategy:
-    player_name: str = attr.ib()
+    player_name: str = attr.ib(default=None)
 
     _possible_moves = [
         DirectMove(dx=dx, dy=dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)

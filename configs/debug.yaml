@@ -16,6 +16,14 @@ PygameInterface:
   border_x: 5
   border_y: 5
   border_between_cells: 5
+  autorun: True
+  fps: 3
+
+Simulator:
+  num_of_steps: 100
+  readonly_state: true
 
 dump_pickle:
   SimulationHistory: "SimulationHistory.pickle"
+
+main_interface: PygameInterface
