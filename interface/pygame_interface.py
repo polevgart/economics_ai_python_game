@@ -100,11 +100,11 @@ class PygameInterface:
         pygame.quit()
 
     def _render_cell(self, cell: BaseObject) -> pygame.Surface:
+        surf = self.empty_surf.copy()
         match cell:  # noqa
             case Bonus():
-                return self.kind_bonus2surf[type(cell)][cell.value]
+                surf.blit(self.kind_bonus2surf[type(cell)][cell.value], (0, 0))
             case Player():
-                surf = self.empty_surf.copy()
                 if not cell.is_alive:
                     surf.blit(self.dead_surf, (0, 0))
                     return surf
@@ -127,11 +127,14 @@ class PygameInterface:
                     width=1,
                 )
 
-                return surf
             case Wall():
-                return self.wall_surf
+                surf.blit(self.wall_surf, (0, 0))
+            case None:
+                pass
             case _:
-                return self.empty_surf
+                logger.error("Unknown cell type %s", cell)
+
+        return surf
 
     def render(self):
         self.screen.fill("black")
