@@ -1,6 +1,7 @@
 import argparse
-import yaml
 import pickle
+import random
+import yaml
 
 
 def get_config():
@@ -43,3 +44,7 @@ def dump_pickle_if_need(config, object):
 
     with open(pickle_filename, "wb") as fout:
         pickle.dump(object, fout)
+
+
+def roll_dice(prob: float) -> bool:
+    return random.random() < prob
