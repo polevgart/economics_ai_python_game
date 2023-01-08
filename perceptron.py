@@ -9,6 +9,7 @@ from genetic import Individual
 from rules import *
 from rules import BaseObject
 from strategy import BaseMove, BaseStrategy
+import util as lib_util
 
 
 Activation = typing.Callable[[npt.ArrayLike], npt.ArrayLike]
@@ -37,7 +38,7 @@ def act_tanh(x: npt.ArrayLike) -> npt.ArrayLike:
 class Perceptron:
     input_size: int = attr.ib()
     output_size: int = attr.ib()
-    hidden_layer_sizes: tuple[int] = attr.ib(default=(10, 10))
+    hidden_layer_sizes: tuple[int] = attr.ib(default=(64, 64))
     activation: Activation = attr.ib(default=act_relu)
     weights: list[npt.ArrayLike] = attr.ib()
 
@@ -102,15 +103,23 @@ class NeuralStrategy(BaseStrategy, Individual):
         return move
 
     def mutate(self):
-        prob = 0.3
+        """Gaussian mutation with standard parameter values mu=0 and sigma=1
+        """
+        prob = 0.1
         for layer in self.perceptron.weights:
             mask = np.random.random(layer.shape) < prob
-            diff = np.random.normal(size=layer.shape)
-            layer[mask] += diff[mask]
+            noise = np.random.normal(size=layer.shape, scale=1e-3)
+            layer[mask] += noise[mask]
 
     def crossover(self, other: 'NeuralStrategy') -> 'NeuralStrategy':
+        eta = 10
         child = copy.deepcopy(self)
         for i, (layer, other_layer) in enumerate(zip(self.perceptron.weights, other.perceptron.weights)):
-            child.perceptron.weights[i] = (layer + other_layer) / 2
+            rand = np.random.random(layer.shape)
+            beta = np.where(rand < 0.5, 2 * rand, 1. / (2 * (1 - rand)))
+            beta **= 1. / (eta + 1)
+            if lib_util.roll_dice(0.5):
+                layer, other_layer = other_layer, layer
+            child.perceptron.weights[i] = ((1 + beta) * layer + (1 - beta) * other_layer) / 2
 
         return child

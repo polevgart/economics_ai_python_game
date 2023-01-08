@@ -2,6 +2,8 @@ import attr
 import random
 from tqdm.auto import tqdm
 
+import util as lib_util
+
 
 class Individual:
     def mutate(self) -> "Individual":
@@ -31,14 +33,14 @@ class GeneticAlgorithm:
     def _(self):
         return tuple(range(self.population_size, 0, -1))
 
-    def gen_start_population(self):
+    def init_population(self):
         return [
             self.individual_factory()
             for _ in range(self.population_size)
         ]
 
     def run(self) -> Individual:
-        population = self.gen_start_population()
+        population = self.init_population()
         ranked_population = self.ranking_phase(population)
 
         for epoch in tqdm(range(self.max_generations)):
@@ -65,7 +67,7 @@ class GeneticAlgorithm:
 
     def mutation_phase(self, survivors: list[Individual]):
         for individual in survivors:
-            if random.random() < self.mutate_prob:
+            if lib_util.roll_dice(self.mutate_prob):
                 individual.mutate()
 
     def ranking_phase(self, population: list[Individual]) -> list[Individual]:

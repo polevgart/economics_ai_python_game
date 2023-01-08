@@ -1,5 +1,6 @@
 import attr
 import functools
+import logging
 from pathlib import Path
 import random
 import typing
@@ -16,6 +17,9 @@ __all__ = (
     "Board",
     "State",
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class BaseObject:
@@ -180,12 +184,12 @@ class Board:
 
     def _load_level_map(self):
         self.cells = []
-        with open(self.level_map_path, 'r') as file:
+        with open(self.level_map_path, "r") as file:
             for line in file:
                 line = line.rstrip()
                 if line:
                     row = [
-                        None if char == '.' else Wall()
+                        None if char == "." else Wall()
                         for char in line
                     ]
                     self.cells.append(row)
@@ -201,8 +205,7 @@ class Board:
                 self._load_level_map()
                 return
             except OSError:
-                # log?
-                pass
+                logger.exception("Couldn't parse level map :(")
 
         self.cells = [[None] * self.size_x for _ in range(self.size_y)]
         self.cells[0] = [Wall()] * self.size_x
