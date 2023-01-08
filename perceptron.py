@@ -2,11 +2,10 @@ import attr
 import copy
 import numpy as np
 import numpy.typing as npt
-import random
 import typing
 
 from genetic import Individual
-from rules import *
+from rules import *  # noqa
 from rules import BaseObject
 from strategy import BaseMove, BaseStrategy
 import util as lib_util

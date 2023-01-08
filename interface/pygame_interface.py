@@ -1,7 +1,8 @@
 import attr
 import pygame
 
-from rules import *
+from rules import *  # noqa
+from rules import BaseObject
 from simulation import Simulator
 
 
@@ -24,6 +25,8 @@ class PygameInterface:
     cell_size = attr.ib(init=False)
 
     player_surf: pygame.Surface = attr.ib(default=None, init=False)
+    dead_surf: pygame.Surface = attr.ib(default=None, init=False)
+    empty_surf: pygame.Surface = attr.ib(default=None, init=False)
     wall_surf: pygame.Surface = attr.ib(default=None, init=False)
     kind_bonus2surf: dict[type, dict[int: pygame.Surface]] = attr.ib(default=None, init=False)
 
@@ -35,15 +38,17 @@ class PygameInterface:
         )
 
     def load_cell_image(self, path):
-        img = pygame.image.load(path)
+        img = pygame.image.load(path).convert_alpha()
         return pygame.transform.scale(img, (self.cell_size, self.cell_size))
 
     def __attrs_post_init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
 
-        self.player_surf = self.load_cell_image(f"images/player.png")
-        self.wall_surf = self.load_cell_image(f"images/wall.png")
+        self.player_surf = self.load_cell_image("images/player.png")
+        self.dead_surf = self.load_cell_image("images/dead.png")
+        self.empty_surf = self.load_cell_image("images/empty.png")
+        self.wall_surf = self.load_cell_image("images/wall.png")
         self.kind_bonus2surf = {
             HealBonus: {
                 value: self.load_cell_image(f"images/heal_x{value}.png")
@@ -59,18 +64,17 @@ class PygameInterface:
             },
         }
 
-
     def start_loop(self, autorun=True, fps=3):
         clock = pygame.time.Clock()
         running = True
         while running:
             next_step = False
             for event in pygame.event.get():
-                match event.type:
+                match event.type:  # noqa
                     case pygame.QUIT:
                         running = False
                     case pygame.KEYDOWN:
-                        match event.key:
+                        match event.key:  # noqa
                             case pygame.K_ESCAPE:
                                 running = False
                             case pygame.K_RETURN | pygame.K_n:
@@ -95,21 +99,47 @@ class PygameInterface:
 
         pygame.quit()
 
+    def _render_cell(self, cell: BaseObject) -> pygame.Surface:
+        match cell:  # noqa
+            case Bonus():
+                return self.kind_bonus2surf[type(cell)][cell.value]
+            case Player():
+                surf = self.empty_surf.copy()
+                if not cell.is_alive:
+                    surf.blit(self.dead_surf, (0, 0))
+                    return surf
+
+                surf.blit(self.player_surf, (0, 0))
+
+                hp_frac = cell.health / cell.max_health
+                hp_color = (
+                    int(min(255, 255 * 2 * (1 - hp_frac))),
+                    int(min(255, 255 * 2 * hp_frac)),
+                    0,
+                )
+                pygame.draw.rect(
+                    surf, hp_color,
+                    (5, self.cell_size - 15, int(hp_frac * (self.cell_size - 10)), 10),
+                )
+                pygame.draw.rect(
+                    surf, "black",
+                    (5, self.cell_size - 15, self.cell_size - 10, 10),
+                    width=1,
+                )
+
+                return surf
+            case Wall():
+                return self.wall_surf
+            case _:
+                return self.empty_surf
+
     def render(self):
         self.screen.fill("black")
         for board_y in range(self.board.size_y):
             for board_x in range(self.board.size_x):
                 cell = self.board.get_cell(board_x, board_y)
+                surf = self._render_cell(cell)
+
                 x = self.border_x + self.cell_size * board_x + self.border_between_cells * board_x
                 y = self.border_y + self.cell_size * board_y + self.border_between_cells * board_y
-                if isinstance(cell, Bonus):
-                    surf = self.kind_bonus2surf[type(cell)][cell.value]
-                elif isinstance(cell, Player):
-                    surf = self.player_surf
-                elif isinstance(cell, Wall):
-                    surf = self.wall_surf
-                else:
-                    surf = pygame.Surface((self.cell_size, self.cell_size))
-                    surf.fill("white")
-
                 self.screen.blit(surf, (x, y))
