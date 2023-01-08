@@ -1,4 +1,5 @@
 import attr
+import logging
 import pygame
 
 from rules import *  # noqa
@@ -7,6 +8,8 @@ from simulation import Simulator
 
 
 MAX_FPS = 30
+
+logger = logging.getLogger(__name__)
 
 
 @attr.s(slots=True, kw_only=True)
