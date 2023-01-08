@@ -2,8 +2,8 @@ Board:
   size_x: 10
   size_y: 10
   num_of_items: 20
-  max_health: 2
-  level_map_path: "maps/level10x10.txt"
+  max_health: 10
+  level_map_path: "level_maps/level10x10.txt"
   player_names:
   - cock
   - shmara
