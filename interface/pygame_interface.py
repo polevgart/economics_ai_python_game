@@ -6,10 +6,9 @@ from rules import *  # noqa
 from rules import BaseObject
 from simulation import Simulator
 
+logger = logging.getLogger(__name__)
 
 MAX_FPS = 30
-
-logger = logging.getLogger(__name__)
 
 
 @attr.s(slots=True, kw_only=True)
@@ -26,6 +25,9 @@ class PygameInterface:
     border_between_cells = attr.ib()
 
     cell_size = attr.ib(init=False)
+
+    autorun: bool = attr.ib()
+    fps: int = attr.ib()
 
     player_surf: pygame.Surface = attr.ib(default=None, init=False)
     dead_surf: pygame.Surface = attr.ib(default=None, init=False)
@@ -67,7 +69,7 @@ class PygameInterface:
             },
         }
 
-    def start_loop(self, autorun=True, fps=3):
+    def start_loop(self):
         clock = pygame.time.Clock()
         running = True
         while running:
@@ -82,19 +84,20 @@ class PygameInterface:
                                 running = False
                             case pygame.K_RETURN | pygame.K_n:
                                 next_step = True
-                                autorun = False
+                                self.autorun = False
                             case pygame.K_SPACE:
-                                autorun = not autorun
+                                self.autorun = not self.autorun
                             case pygame.K_a:
-                                fps = max(1, fps - 1)
+                                self.fps = max(1, self.fps - 1)
                             case pygame.K_s:
-                                fps = min(MAX_FPS, fps + 1)
+                                self.fps = min(MAX_FPS, self.fps + 1)
 
-            if autorun:
-                clock.tick(fps)
+            if self.autorun:
+                clock.tick(self.fps)
                 next_step = True
 
             if next_step and not self.simulator.is_endgame:
+                # logger.warning("step")
                 self.simulator.step()
 
             self.render()

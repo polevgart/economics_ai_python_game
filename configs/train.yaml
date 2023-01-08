@@ -12,12 +12,13 @@ Board:
 
 GeneticAlgorithm:
   max_generations: 100
-  population_size: 20
+  population_size: 100
   num_of_children: 8
   mutate_prob: 0.3
 
 Simulator:
   num_of_steps: 100
+  readonly_state: false
 
 dump_pickle:
   NeuralStrategy: "NeuralStrategy.pickle"

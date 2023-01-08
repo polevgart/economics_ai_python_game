@@ -20,6 +20,10 @@ def main():
     board = copy.deepcopy(simulation_hist.initial_board)
 
     strategy = lib_util.load_pickle(config, NeuralStrategy)
+    if strategy is None:
+        logger.warning("Strategy didn't loaded. A RandomStrategy will be created")
+        strategy = RandomStrategy()
+
     strategies = []
     for i in range(4):
         named_strategy = copy.deepcopy(strategy)
@@ -34,19 +38,17 @@ def main():
             NeuralStrategy(player_name=board.player_names[2]),
             NeuralStrategy(player_name=board.player_names[3]),
         ],
-        num_of_steps=2000,
         simulation_hist=simulation_hist,
+        **config["Simulator"],
     )
-    # renderer = CliInterface(
-    #     board=board,
-    #     simulator=simulator,
-    # )
-    renderer = PygameInterface(
+    interface_class_name = config["main_interface"]
+    interface_class = globals()[interface_class_name]
+    interface = interface_class(
         board=board,
         simulator=simulator,
-        **config["PygameInterface"],
+        **config.get(interface_class_name, {}),
     )
-    renderer.start_loop(autorun=False)
+    interface.start_loop()
     lib_util.dump_pickle_if_need(config, simulator.simulation_hist)
 
 

@@ -33,6 +33,7 @@ class Simulator:
     num_of_steps: int = attr.ib()
     cur_step: int = attr.ib(default=0, init=False)
     simulation_hist: SimulationHistory = attr.ib(factory=SimulationHistory)
+    readonly_state: bool = attr.ib()
 
     @players.default
     def _(self):
@@ -50,14 +51,15 @@ class Simulator:
         if turn_desc is not None:
             return turn_desc
 
-        state = self.board.get_state_ref()
+        frozen_state = self.board.get_state_ref()
         move_kind2player__move = collections.defaultdict(list)
         for player, strategy in zip(self.players, self.strategies):
             if not player.is_alive:
                 continue
 
+            state = copy.deepcopy(frozen_state) if self.readonly_state else frozen_state
             try:
-                move = strategy.get_next_move(copy.deepcopy(state))
+                move = strategy.get_next_move(state)
             except Exception:
                 logger.exception("Error in get_next_move")
                 raise
@@ -96,3 +98,4 @@ class Simulator:
         self.handle_shoots(turn_desc.shoots)
         self.handle_direct_moves(turn_desc.direct_moves)
         self.finish_step()
+        return turn_desc

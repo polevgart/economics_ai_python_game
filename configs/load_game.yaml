@@ -8,6 +8,8 @@ PygameInterface:
   border_x: 5
   border_y: 5
   border_between_cells: 5
+  autorun: True
+  fps: 3
 
 Board:
   size_x: 10
@@ -20,3 +22,9 @@ Board:
   - shmara
   - david
   - guzeeva
+
+Simulator:
+  num_of_steps: 100
+  readonly_state: true
+
+main_interface: CliInterface
