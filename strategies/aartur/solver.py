@@ -4,8 +4,8 @@ from rules import Wall, ScoreBonus, HealBonus, Player
 from .preparation import AdvancedState, Map
 
 
-class Solver:
-    """Solver is responsible for solving one particular task.
+class BaseSolver:
+    """BaseSolver is responsible for solving one particular task.
 
     This task can be, for example, collecting ScoreBonus or shooting at enemies.
 
@@ -19,7 +19,7 @@ class Solver:
         raise NotImplementedError()
 
 
-class CollectBonusSolver(Solver):
+class CollectBonusSolver(BaseSolver):
     """Solver for collecting one particular type of Bonus, which is defined in 'bonus_type'.
     """
 
@@ -61,7 +61,7 @@ class CollectHealBonusSolver(CollectBonusSolver):
     bonus_type: type = HealBonus
 
 
-class ShootSolver(Solver):
+class ShootSolver(BaseSolver):
     """Solver for shooting at enemy.
 
     It can return either Shoot, shooting at enemy, or DirectMove, moving to enemy if it is out of range.
@@ -131,7 +131,7 @@ class ShootSolver(Solver):
         return move, confidence
 
 
-class HideSolver(Solver):
+class HideSolver(BaseSolver):
     """Solver for hiding from enemies. [not implemented!]
 
     If you are low on health then maybe you should hide and survive?
@@ -141,7 +141,7 @@ class HideSolver(Solver):
         return DirectMove(dx=1, dy=1), 0.0
 
 
-class CenterSolver(Solver):
+class CenterSolver(BaseSolver):
     """Solver for going to the center of board. [not implemented!]
 
     If nothing to do then maybe you should go to the center? More opportunities (and more risk of dying!)

@@ -2,7 +2,7 @@ from strategy import BaseMove, BaseStrategy
 from rules import State
 
 from .preparation import AdvancedState, Map
-from .solver import Solver, CollectHealBonusSolver, CollectScoreBonusSolver, ShootSolver  # , HideSolver, CenterSolver
+from .solver import BaseSolver, CollectHealBonusSolver, CollectScoreBonusSolver, ShootSolver  # , HideSolver, CenterSolver
 
 
 class AArturBaseStrategy(BaseStrategy):
@@ -16,7 +16,7 @@ class AArturBaseStrategy(BaseStrategy):
     3. Pick a move with maximum value
     """
 
-    solvers: dict[Solver, float]  # maybe this should be a member of object, not the class itself?
+    solvers: dict[BaseSolver, float]  # maybe this should be a member of object, not the class itself?
     # for now, I am just too lazy to write a __init__...
 
     def get_next_move(self, state: State) -> BaseMove:
@@ -39,8 +39,8 @@ class AArturSmartStrategy(AArturBaseStrategy):
 
     solvers = {
         CollectScoreBonusSolver(): 1.0,
-        CollectHealBonusSolver(): 3.0,
-        ShootSolver(): 1.0,
+        # CollectHealBonusSolver(): 3.0,
+        # ShootSolver(): 2.0,
         # HideSolver(): 1.0,
         # CenterSolver(): 1.0,
     }
