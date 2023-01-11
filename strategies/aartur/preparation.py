@@ -1,3 +1,6 @@
+from collections import deque
+from typing import Deque
+
 from rules import State, Wall, Player
 
 
@@ -60,24 +63,24 @@ class ReachabilityGraph:
             for _ in range(state.size_y)
         ]
 
-        # Initializing original cell with dist=0 and starting recursion process
-        self.graph[state.player.y][state.player.x] = ReachabilityGraphCell(dist=0, visited=True)
-        self._fill_graph(state, [(state.player.x, state.player.y)], 1)
+        self._fill_graph(state, state.player.x, state.player.y)
 
-    def _fill_graph(self, state: ExtendedState, cells: list[tuple[int, int]], dist: int):
-        # Recursive function for filling graph cells step-by-step
-        next_cells = []
-        for x, y in cells:
+    def _fill_graph(self, state: ExtendedState, start_x: int, start_y: int):
+        # Iterative function for filling graph cells (BFS)
+        self.set_cell(ReachabilityGraphCell(dist=0, visited=True), x=start_x, y=start_y)
+
+        cells: Deque[tuple[int, int, int]] = deque()
+        cells.append((start_x, start_y, 1))
+        while cells:
+            x, y, dist = cells.popleft()
+
             for dx in (-1, 0, 1):
                 for dy in (-1, 0, 1):
                     new_x, new_y = x + dx, y + dy
                     if (not isinstance(state.get_cell(x=new_x, y=new_y), (Player, Wall)) and
-                            not self.graph[new_y][new_x].visited):
-                        next_cells.append((new_x, new_y))
-                        self.graph[new_y][new_x] = ReachabilityGraphCell(dist=dist, dx=dx, dy=dy, visited=True)
-
-        if next_cells:
-            self._fill_graph(state, next_cells, dist + 1)
+                            not self.get_cell(x=new_x, y=new_y).visited):
+                        cells.append((new_x, new_y, dist + 1))
+                        self.set_cell(ReachabilityGraphCell(dist=dist, dx=dx, dy=dy, visited=True), x=new_x, y=new_y)
 
     def show(self) -> str:
         str_size: int = 12
