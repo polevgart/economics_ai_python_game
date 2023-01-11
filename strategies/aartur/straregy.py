@@ -3,7 +3,7 @@ import attr
 from strategy import BaseMove, BaseStrategy
 from rules import State
 
-from .preparation import AdvancedState, Map
+from .preparation import ExtendedState, ReachabilityGraph
 from .solver import BaseSolver, CollectHealBonusSolver, CollectScoreBonusSolver, ShootSolver, HideSolver, CenterSolver
 
 
@@ -23,11 +23,11 @@ class AArturBaseStrategy(BaseStrategy):
 
     def get_next_move(self, state: State) -> BaseMove:
         moves: list[tuple[BaseMove, float]] = []  # if only the DirectMove and Shoot were hashable...
-        state = AdvancedState(state, self.player_name)
-        mapper = Map(state)
+        state = ExtendedState(state, self.player_name)
+        graph = ReachabilityGraph(state)
 
         for solver, priority in self.solvers.items():
-            move, confidence = solver.solve(state, mapper)
+            move, confidence = solver.solve(state, graph)
             moves.append((move, priority * confidence))
 
         # choosing a move with maximum priority * confidence

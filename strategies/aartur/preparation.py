@@ -1,7 +1,7 @@
 from rules import State, Wall, Player
 
 
-class AdvancedState:
+class ExtendedState:
     """More convenient State, containing current player and other players."""
 
     def __init__(self, state: State, player_name: str):
@@ -27,8 +27,8 @@ class AdvancedState:
         self.cells[y][x] = cell
 
 
-class MapCell:
-    """Element of a 'Map'.
+class ReachabilityGraphCell:
+    """Element of a 'ReachabilityGraph'.
 
     Contains distance to the corresponding cell and direction *from* the previous cell
     (which also contains direction from its previous cell,
@@ -44,37 +44,40 @@ class MapCell:
         self.visited: bool = visited
 
 
-class Map:
+class ReachabilityGraph:
     """Calculates distance and path from state.player to all other cells.
 
-    Map is being constructed once per each turn and then is being used in algorithms
+    ReachabilityGraph is being constructed once per each turn and then is being used in algorithms
     that require some kind of movement on the board.
     """
 
-    def __init__(self, state: AdvancedState):
-        """Constructing a Map from State"""
+    def __init__(self, state: ExtendedState):
+        """Constructing a ReachabilityGraph from State"""
         self.size_x = state.size_x
         self.size_y = state.size_y
-        self.map: list[list[MapCell]] = [[MapCell() for _ in range(state.size_x)] for _ in range(state.size_y)]
+        self.graph: list[list[ReachabilityGraphCell]] = [
+            [ReachabilityGraphCell() for _ in range(state.size_x)]
+            for _ in range(state.size_y)
+        ]
 
         # Initializing original cell with dist=0 and starting recursion process
-        self.map[state.player.y][state.player.x] = MapCell(dist=0, visited=True)
-        self._fill_map(state, [(state.player.x, state.player.y)], 1)
+        self.graph[state.player.y][state.player.x] = ReachabilityGraphCell(dist=0, visited=True)
+        self._fill_graph(state, [(state.player.x, state.player.y)], 1)
 
-    def _fill_map(self, state: AdvancedState, cells: list[tuple[int, int]], dist: int):
-        # Recursive function for filling map cells step-by-step
+    def _fill_graph(self, state: ExtendedState, cells: list[tuple[int, int]], dist: int):
+        # Recursive function for filling graph cells step-by-step
         next_cells = []
         for x, y in cells:
             for dx in (-1, 0, 1):
                 for dy in (-1, 0, 1):
                     new_x, new_y = x + dx, y + dy
                     if (not isinstance(state.get_cell(x=new_x, y=new_y), (Player, Wall)) and
-                            not self.map[new_y][new_x].visited):
+                            not self.graph[new_y][new_x].visited):
                         next_cells.append((new_x, new_y))
-                        self.map[new_y][new_x] = MapCell(dist=dist, dx=dx, dy=dy, visited=True)
+                        self.graph[new_y][new_x] = ReachabilityGraphCell(dist=dist, dx=dx, dy=dy, visited=True)
 
         if next_cells:
-            self._fill_map(state, next_cells, dist + 1)
+            self._fill_graph(state, next_cells, dist + 1)
 
     def show(self) -> str:
         str_size: int = 12
@@ -97,8 +100,8 @@ class Map:
 
         return cell.dx, cell.dy
 
-    def get_cell(self, *, x: int, y: int) -> MapCell:
-        return self.map[y][x]
+    def get_cell(self, *, x: int, y: int) -> ReachabilityGraphCell:
+        return self.graph[y][x]
 
-    def set_cell(self, cell: MapCell, *, x: int, y: int):
-        self.map[y][x] = cell
+    def set_cell(self, cell: ReachabilityGraphCell, *, x: int, y: int):
+        self.graph[y][x] = cell

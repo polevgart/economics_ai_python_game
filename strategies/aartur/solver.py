@@ -1,7 +1,7 @@
 from strategy import BaseMove, DirectMove, Shoot
 from rules import Wall, ScoreBonus, HealBonus, Player
 
-from .preparation import AdvancedState, Map
+from .preparation import ExtendedState, ReachabilityGraph
 
 
 class BaseSolver:
@@ -9,13 +9,13 @@ class BaseSolver:
 
     This task can be, for example, collecting ScoreBonus or shooting at enemies.
 
-    Its main method, 'solve', takes AdvancedState and a precalculated Map,
+    Its main method, 'solve', takes ExtendedState and a precalculated ReachabilityGraph,
     and returns BaseMove (which is the most suitable for this task) and 'confidence' in this move.
     'confidence' is just float, preferably from 0.0 to 1.0, where
     1.0 means max confidence and 0.0 means totally useless move.
     """
 
-    def solve(self, state: AdvancedState, mapper: Map) -> tuple[BaseMove, float]:
+    def solve(self, state: ExtendedState, graph: ReachabilityGraph) -> tuple[BaseMove, float]:
         raise NotImplementedError()
 
 
@@ -32,21 +32,21 @@ class CollectBonusSolver(BaseSolver):
         """
         raise NotImplementedError()
 
-    def solve(self, state: AdvancedState, mapper: Map) -> tuple[BaseMove, float]:
+    def solve(self, state: ExtendedState, graph: ReachabilityGraph) -> tuple[BaseMove, float]:
         bonuses: list[tuple[int, int]] = []   # list of coordinates of all bonuses on the map
         for y in range(state.size_y):
             for x in range(state.size_x):
-                if isinstance(state.get_cell(x=x, y=y), self.bonus_type) and mapper.get_cell(x=x, y=y).visited:
+                if isinstance(state.get_cell(x=x, y=y), self.bonus_type) and graph.get_cell(x=x, y=y).visited:
                     bonuses.append((x, y))
 
         if not bonuses:
             return DirectMove(dx=0, dy=0), 0.0
 
         # choosing the closest bonus as our goal (for now ignoring the bonus value)
-        x, y = min(bonuses, key=lambda elem: mapper.get_cell(x=elem[0], y=elem[1]).dist)
-        dx, dy = mapper.get_direction_to(x, y)
+        x, y = min(bonuses, key=lambda elem: graph.get_cell(x=elem[0], y=elem[1]).dist)
+        dx, dy = graph.get_direction_to(x, y)
 
-        dist = mapper.get_cell(x=x, y=y).dist
+        dist = graph.get_cell(x=x, y=y).dist
         confidence = self.calculate_confidence(dist, state.player)
 
         return DirectMove(dx=dx, dy=dy), confidence
@@ -86,7 +86,7 @@ class ShootSolver(BaseSolver):
     confidence_direct_shooting: float = 0.5  # base confidence if we can shoot enemy directly (which is greater)
     # except this base confidence, there is other part which depends on how damaged the enemy is
 
-    def solve(self, state: AdvancedState, mapper: Map) -> tuple[BaseMove, float]:
+    def solve(self, state: ExtendedState, graph: ReachabilityGraph) -> tuple[BaseMove, float]:
         # closest positions from which we can shoot at enemy
         closest_shoot_positions: list[tuple[Player, tuple[int, int]]] = []
         for enemy in state.other_players:
@@ -103,7 +103,7 @@ class ShootSolver(BaseSolver):
                         # all *other* players are blocking our shot, so breaking
                         # (we don't count *ourselves* as an obstacle for shooting!)
                         break
-                    if mapper.get_cell(x=x, y=y).visited:
+                    if graph.get_cell(x=x, y=y).visited:
                         shoot_positions.append((x, y))
                     x += dx
                     y += dy
@@ -111,7 +111,7 @@ class ShootSolver(BaseSolver):
             if shoot_positions:
                 # finding the closest shooting position
                 closest_shoot_position = min(shoot_positions,
-                                             key=lambda elem: mapper.get_cell(x=elem[0], y=elem[1]).dist)
+                                             key=lambda elem: graph.get_cell(x=elem[0], y=elem[1]).dist)
                 closest_shoot_positions.append((enemy, closest_shoot_position))
 
         if not closest_shoot_positions:
@@ -120,9 +120,9 @@ class ShootSolver(BaseSolver):
         # constructing and assessing move for each enemy
         shoot_moves: list[tuple[BaseMove, float]] = []
         for enemy, (x, y) in closest_shoot_positions:
-            if mapper.get_cell(x=x, y=y).dist > 0:
+            if graph.get_cell(x=x, y=y).dist > 0:
                 # if distance > 0 then we cannot shoot directly, we have to walk
-                move = mapper.get_direction_to(x, y)
+                move = graph.get_direction_to(x, y)
                 move = DirectMove(dx=move[0], dy=move[1])
                 confidence = self.confidence_moving
             else:
@@ -151,7 +151,7 @@ class HideSolver(BaseSolver):
     If you are low on health then maybe you should hide and survive?
     """
 
-    def solve(self, state: AdvancedState, mapper: Map) -> tuple[BaseMove, float]:
+    def solve(self, state: ExtendedState, graph: ReachabilityGraph) -> tuple[BaseMove, float]:
         return DirectMove(dx=1, dy=1), 0.0
 
 
@@ -161,5 +161,5 @@ class CenterSolver(BaseSolver):
     If nothing to do then maybe you should go to the center? More opportunities (and more risk of dying!)
     """
 
-    def solve(self, state: AdvancedState, mapper: Map) -> tuple[BaseMove, float]:
+    def solve(self, state: ExtendedState, graph: ReachabilityGraph) -> tuple[BaseMove, float]:
         return DirectMove(dx=1, dy=1), 0.0
