@@ -1,10 +1,13 @@
+import attr
+
 from strategy import BaseMove, BaseStrategy
 from rules import State
 
 from .preparation import AdvancedState, Map
-from .solver import BaseSolver, CollectHealBonusSolver, CollectScoreBonusSolver, ShootSolver  # , HideSolver, CenterSolver
+from .solver import BaseSolver, CollectHealBonusSolver, CollectScoreBonusSolver, ShootSolver, HideSolver, CenterSolver
 
 
+@attr.s(slots=True, kw_only=True)
 class AArturBaseStrategy(BaseStrategy):
     """My base strategy! Chicken!
 
@@ -16,8 +19,7 @@ class AArturBaseStrategy(BaseStrategy):
     3. Pick a move with maximum value
     """
 
-    solvers: dict[BaseSolver, float]  # maybe this should be a member of object, not the class itself?
-    # for now, I am just too lazy to write a __init__...
+    solvers: dict[BaseSolver, float] = attr.ib(factory=dict, init=False)
 
     def get_next_move(self, state: State) -> BaseMove:
         moves: list[tuple[BaseMove, float]] = []  # if only the DirectMove and Shoot were hashable...
@@ -34,13 +36,15 @@ class AArturBaseStrategy(BaseStrategy):
         return result_move
 
 
+@attr.s(slots=True, kw_only=True)
 class AArturSmartStrategy(AArturBaseStrategy):
     """This is my strategy that should be imported and used."""
 
-    solvers = {
-        CollectScoreBonusSolver(): 1.0,
-        # CollectHealBonusSolver(): 3.0,
-        # ShootSolver(): 2.0,
-        # HideSolver(): 1.0,
-        # CenterSolver(): 1.0,
-    }
+    def __attrs_post_init__(self):
+        self.solvers = {
+            CollectScoreBonusSolver(): 1.0,
+            CollectHealBonusSolver(): 3.0,
+            ShootSolver(): 2.0,
+            HideSolver(): 0.0,
+            CenterSolver(): 0.0,
+        }
