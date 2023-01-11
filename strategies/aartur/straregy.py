@@ -1,6 +1,6 @@
 import attr
 
-from strategy import BaseMove, BaseStrategy
+from strategy import BaseMove, DirectMove, BaseStrategy
 from rules import State
 
 from .preparation import ExtendedState, ReachabilityGraph
@@ -22,18 +22,21 @@ class AArturBaseStrategy(BaseStrategy):
     solvers: dict[BaseSolver, float] = attr.ib(factory=dict, init=False)
 
     def get_next_move(self, state: State) -> BaseMove:
-        moves: list[tuple[BaseMove, float]] = []  # if only the DirectMove and Shoot were hashable...
         state = ExtendedState(state, self.player_name)
         graph = ReachabilityGraph(state)
 
-        for solver, priority in self.solvers.items():
-            move, confidence = solver.solve(state, graph)
-            moves.append((move, priority * confidence))
+        best_move = DirectMove(dx=0, dy=0)
+        best_score = 0.0
 
         # choosing a move with maximum priority * confidence
-        result_move, power = max(moves, key=lambda elem: elem[1])
+        for solver, priority in self.solvers.items():
+            move, confidence = solver.solve(state, graph)
+            score = priority * confidence
+            if score > best_score:
+                best_score = score
+                best_move = move
 
-        return result_move
+        return best_move
 
 
 @attr.s(slots=True, kw_only=True)
