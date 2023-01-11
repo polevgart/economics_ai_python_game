@@ -25,6 +25,13 @@ class CollectBonusSolver(BaseSolver):
 
     bonus_type: type = None
 
+    @staticmethod
+    def calculate_confidence(dist: int, player: Player) -> float:
+        """Calculating confidence in move based on the distance to the bonus and
+        some player state (for example, its health)
+        """
+        raise NotImplementedError()
+
     def solve(self, state: AdvancedState, mapper: Map) -> tuple[BaseMove, float]:
         bonuses: list[tuple[int, int]] = []   # list of coordinates of all bonuses on the map
         for y in range(state.size_y):
@@ -40,11 +47,7 @@ class CollectBonusSolver(BaseSolver):
         dx, dy = mapper.goto(x, y)
 
         dist = mapper.get_cell(x=x, y=y).dist
-        confidence = 1.0 - dist * 0.1
-        if self.bonus_type == HealBonus:
-            # confidence is greater if we are low on health
-            # (maybe checking the type of bonus and changing confidence should be somewhere else IDK)
-            confidence *= (1.0 - state.player.health / state.player.max_health)
+        confidence = self.calculate_confidence(dist, state.player)
 
         return DirectMove(dx=dx, dy=dy), confidence
 
@@ -54,11 +57,22 @@ class CollectScoreBonusSolver(CollectBonusSolver):
 
     bonus_type: type = ScoreBonus
 
+    @staticmethod
+    def calculate_confidence(dist: int, player: Player) -> float:
+        return max(0.0, 1.0 - dist * 0.1)
+
 
 class CollectHealBonusSolver(CollectBonusSolver):
     """Solver for collecting HealBonus."""
 
     bonus_type: type = HealBonus
+
+    @staticmethod
+    def calculate_confidence(dist: int, player: Player) -> float:
+        # confidence is greater if we are low on health
+        confidence = max(0.0, 1.0 - dist * 0.1)
+        confidence *= (1.0 - player.health / player.max_health)
+        return confidence
 
 
 class ShootSolver(BaseSolver):
