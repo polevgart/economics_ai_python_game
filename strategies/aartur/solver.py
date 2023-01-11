@@ -29,17 +29,17 @@ class CollectBonusSolver(BaseSolver):
         bonuses: list[tuple[int, int]] = []   # list of coordinates of all bonuses on the map
         for y in range(state.size_y):
             for x in range(state.size_x):
-                if isinstance(state[y][x], self.bonus_type) and mapper[y][x].visited:
+                if isinstance(state.get_cell(x=x, y=y), self.bonus_type) and mapper.get_cell(x=x, y=y).visited:
                     bonuses.append((x, y))
 
         if not bonuses:
             return DirectMove(dx=0, dy=0), 0.0
 
         # choosing the closest bonus as our goal (for now ignoring the bonus value)
-        x, y = min(bonuses, key=lambda elem: mapper[elem[1]][elem[0]].dist)
+        x, y = min(bonuses, key=lambda elem: mapper.get_cell(x=elem[0], y=elem[1]).dist)
         dx, dy = mapper.goto(x, y)
 
-        dist = mapper[y][x].dist
+        dist = mapper.get_cell(x=x, y=y).dist
         confidence = 1.0 - dist * 0.1
         if self.bonus_type == HealBonus:
             # confidence is greater if we are low on health
@@ -85,19 +85,20 @@ class ShootSolver(BaseSolver):
                 y = enemy.y + dy
 
                 # finding all possible positions from which we can shoot at enemy
-                while not isinstance(state[y][x], (Wall,)):
-                    if isinstance(state[y][x], Player) and (x != state.player.x or y != state.player.y):
+                while not isinstance(state.get_cell(x=x, y=y), (Wall,)):
+                    if isinstance(state.get_cell(x=x, y=y), Player) and (x != state.player.x or y != state.player.y):
                         # all *other* players are blocking our shot, so breaking
                         # (we don't count *ourselves* as an obstacle for shooting!)
                         break
-                    if mapper[y][x].visited:
+                    if mapper.get_cell(x=x, y=y).visited:
                         shoot_positions.append((x, y))
                     x += dx
                     y += dy
 
             if shoot_positions:
                 # finding the closest shooting position
-                closest_shoot_position = min(shoot_positions, key=lambda elem: mapper[elem[1]][elem[0]].dist)
+                closest_shoot_position = min(shoot_positions,
+                                             key=lambda elem: mapper.get_cell(x=elem[0], y=elem[1]).dist)
                 closest_shoot_positions.append((enemy, closest_shoot_position))
 
         if not closest_shoot_positions:
@@ -106,7 +107,7 @@ class ShootSolver(BaseSolver):
         # constructing and assessing move for each enemy
         shoot_moves: list[tuple[BaseMove, float]] = []
         for enemy, (x, y) in closest_shoot_positions:
-            if mapper[y][x].dist > 0:
+            if mapper.get_cell(x=x, y=y).dist > 0:
                 # if distance > 0 then we cannot shoot directly, we have to walk
                 move = mapper.goto(x, y)
                 move = DirectMove(dx=move[0], dy=move[1])
