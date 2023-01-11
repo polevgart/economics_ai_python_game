@@ -44,7 +44,7 @@ class CollectBonusSolver(BaseSolver):
 
         # choosing the closest bonus as our goal (for now ignoring the bonus value)
         x, y = min(bonuses, key=lambda elem: mapper.get_cell(x=elem[0], y=elem[1]).dist)
-        dx, dy = mapper.goto(x, y)
+        dx, dy = mapper.get_direction_to(x, y)
 
         dist = mapper.get_cell(x=x, y=y).dist
         confidence = self.calculate_confidence(dist, state.player)
@@ -91,7 +91,6 @@ class ShootSolver(BaseSolver):
         closest_shoot_positions: list[tuple[Player, tuple[int, int]]] = []
         for enemy in state.other_players:
             if not enemy.is_alive:
-                # ignoring dead enemies!
                 continue
             shoot_positions: list[tuple[int, int]] = []
             for dx, dy in (-1, 0), (1, 0), (0, -1), (0, 1):
@@ -123,7 +122,7 @@ class ShootSolver(BaseSolver):
         for enemy, (x, y) in closest_shoot_positions:
             if mapper.get_cell(x=x, y=y).dist > 0:
                 # if distance > 0 then we cannot shoot directly, we have to walk
-                move = mapper.goto(x, y)
+                move = mapper.get_direction_to(x, y)
                 move = DirectMove(dx=move[0], dy=move[1])
                 confidence = self.confidence_moving
             else:

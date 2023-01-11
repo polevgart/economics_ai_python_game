@@ -87,7 +87,7 @@ class Map:
             s += '\n'
         return s
 
-    def goto(self, x: int, y: int) -> tuple[int, int]:
+    def get_direction_to(self, x: int, y: int) -> tuple[int, int]:
         """Calculates direction from the original cell to a given cell."""
         cell = self.get_cell(x=x, y=y)
         while cell.dist > 1:
