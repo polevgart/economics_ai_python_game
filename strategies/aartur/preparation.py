@@ -16,7 +16,7 @@ class ExtendedState:
         self.other_players: list[Player] = []
         for y in range(self.size_y):
             for x in range(self.size_x):
-                cell = self.cells[y][x]
+                cell = self.get_cell(x=x, y=y)
                 if isinstance(cell, Player):
                     if cell.name == player_name:
                         self.player = cell
