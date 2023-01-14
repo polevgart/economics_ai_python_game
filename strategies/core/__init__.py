@@ -20,8 +20,8 @@ class BaseMove:
 
 @attr.s(slots=True, kw_only=True)
 class DirectMove(BaseMove):
-    """Направления движения. Можно стоять на месте
-    """
+    """Направления движения. Можно стоять на месте"""
+
     dx: int = attr.ib()
     dy: int = attr.ib()
 
@@ -34,6 +34,7 @@ class Shoot(BaseMove):
     """4 стороны - направления выстрела.
     При попадании +1 очко выстрелившему и -1 хп противнику
     """
+
     dx: int = attr.ib()
     dy: int = attr.ib()
 
@@ -45,14 +46,14 @@ class Shoot(BaseMove):
 class BaseStrategy:
     player_name: str = attr.ib(default=None)
 
-    _possible_moves = [
-        DirectMove(dx=dx, dy=dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)
-    ] + [
+    _possible_direct_moves = [DirectMove(dx=dx, dy=dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)]
+    _possible_shoot_moves = [
         Shoot(dx=1, dy=0),
         Shoot(dx=-1, dy=0),
         Shoot(dx=0, dy=-1),
         Shoot(dx=0, dy=1),
     ]
+    _possible_moves = _possible_direct_moves + _possible_shoot_moves
 
     def get_next_move(self, state: State) -> BaseMove:
         raise NotImplementedError()
