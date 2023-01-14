@@ -1,4 +1,4 @@
-from strategy import BaseMove, DirectMove, Shoot
+from strategies.core import BaseMove, DirectMove, Shoot
 from rules import Wall, ScoreBonus, HealBonus, Player
 
 from .preparation import ExtendedState, ReachabilityGraph
