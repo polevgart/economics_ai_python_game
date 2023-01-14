@@ -158,7 +158,13 @@ class Board:
 
     cells: list[list[typing.Optional[BaseObject]]] = attr.ib(default=None, init=False)
     _name2player: dict[PlayerName, Player] = attr.ib(factory=dict, init=False)
+    num_of_players: int = attr.ib(default=None)
     player_names: list[PlayerName] = attr.ib()
+
+    @player_names.default
+    def _(self):
+        assert self.amount_of_players is not None, "Not defined amount_of_players and player_names for Board. You must define anything"
+        return list(map(str, range(self.amount_of_players)))
 
     def __attrs_post_init__(self):
         self.restart()
