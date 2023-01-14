@@ -4,7 +4,7 @@ import copy
 import genetic
 import util as lib_util
 
-from perceptron import NeuralStrategy
+from strategies.neural_network import NeuralStrategy
 from rules import Board
 from simulation import Simulator
 

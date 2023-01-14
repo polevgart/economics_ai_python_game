@@ -4,10 +4,10 @@ import logging
 import util as lib_util
 
 from interface import CliInterface, PygameInterface  # noqa: F401
-from perceptron import NeuralStrategy
+from strategies.neural_network import NeuralStrategy
 from rules import Board
 from simulation import Simulator, SimulationHistory
-from strategy import *  # noqa
+from strategies.core import *  # noqa
 
 logger = logging.getLogger(__name__)
 

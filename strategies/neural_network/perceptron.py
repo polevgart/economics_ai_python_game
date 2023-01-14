@@ -7,7 +7,7 @@ import typing
 from genetic import Individual
 from rules import *  # noqa
 from rules import BaseObject
-from strategy import BaseMove, BaseStrategy
+from strategies.core import BaseMove, BaseStrategy
 import util as lib_util
 
 

@@ -4,7 +4,7 @@ import copy
 import logging
 
 from rules import Board, Player, PlayerName
-from strategy import BaseStrategy, BaseMove, Shoot, DirectMove
+from strategies.core import BaseStrategy, BaseMove, Shoot, DirectMove
 
 logger = logging.getLogger(__name__)
 

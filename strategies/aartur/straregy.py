@@ -1,6 +1,6 @@
 import attr
 
-from strategy import BaseMove, DirectMove, BaseStrategy
+from strategies.core import BaseMove, DirectMove, BaseStrategy
 from rules import State
 
 from .preparation import ExtendedState, ReachabilityGraph
