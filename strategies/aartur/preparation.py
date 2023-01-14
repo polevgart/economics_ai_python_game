@@ -59,8 +59,7 @@ class ReachabilityGraph:
         self.size_x = state.size_x
         self.size_y = state.size_y
         self.graph: list[list[ReachabilityGraphCell]] = [
-            [ReachabilityGraphCell() for _ in range(state.size_x)]
-            for _ in range(state.size_y)
+            [ReachabilityGraphCell() for _ in range(state.size_x)] for _ in range(state.size_y)
         ]
 
         self._fill_graph(state, state.player.x, state.player.y)
@@ -77,20 +76,22 @@ class ReachabilityGraph:
             for dx in (-1, 0, 1):
                 for dy in (-1, 0, 1):
                     new_x, new_y = x + dx, y + dy
-                    if (not isinstance(state.get_cell(x=new_x, y=new_y), (Player, Wall)) and
-                            not self.get_cell(x=new_x, y=new_y).visited):
+                    if (
+                        not isinstance(state.get_cell(x=new_x, y=new_y), (Player, Wall))
+                        and not self.get_cell(x=new_x, y=new_y).visited
+                    ):
                         cells.append((new_x, new_y, dist + 1))
                         self.set_cell(ReachabilityGraphCell(dist=dist, dx=dx, dy=dy, visited=True), x=new_x, y=new_y)
 
     def show(self) -> str:
         str_size: int = 12
-        s = ''
+        s = ""
         for y in range(self.size_y):
             for x in range(self.size_x):
                 cell = self.get_cell(x=x, y=y)
-                cell_str = f'{cell.dist} ({cell.dx}, {cell.dy})' if cell.visited else ''
-                s += cell_str.ljust(str_size) + ' | '
-            s += '\n'
+                cell_str = f"{cell.dist} ({cell.dx}, {cell.dy})" if cell.visited else ""
+                s += cell_str.ljust(str_size) + " | "
+            s += "\n"
         return s
 
     def get_direction_to(self, x: int, y: int) -> tuple[int, int]:

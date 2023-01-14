@@ -20,8 +20,7 @@ class BaseSolver:
 
 
 class CollectBonusSolver(BaseSolver):
-    """Solver for collecting one particular type of Bonus, which is defined in 'bonus_type'.
-    """
+    """Solver for collecting one particular type of Bonus, which is defined in 'bonus_type'."""
 
     bonus_type: type = None
 
@@ -33,7 +32,7 @@ class CollectBonusSolver(BaseSolver):
         raise NotImplementedError()
 
     def solve(self, state: ExtendedState, graph: ReachabilityGraph) -> tuple[BaseMove, float]:
-        bonuses: list[tuple[int, int]] = []   # list of coordinates of all bonuses on the map
+        bonuses: list[tuple[int, int]] = []  # list of coordinates of all bonuses on the map
         for y in range(state.size_y):
             for x in range(state.size_x):
                 if isinstance(state.get_cell(x=x, y=y), self.bonus_type) and graph.get_cell(x=x, y=y).visited:
@@ -71,7 +70,7 @@ class CollectHealBonusSolver(CollectBonusSolver):
     def calculate_confidence(dist: int, player: Player) -> float:
         # confidence is greater if we are low on health
         confidence = max(0.0, 1.0 - dist * 0.1)
-        confidence *= (1.0 - player.health / player.max_health)
+        confidence *= 1.0 - player.health / player.max_health
         return confidence
 
 
@@ -110,8 +109,9 @@ class ShootSolver(BaseSolver):
 
             if shoot_positions:
                 # finding the closest shooting position
-                closest_shoot_position = min(shoot_positions,
-                                             key=lambda elem: graph.get_cell(x=elem[0], y=elem[1]).dist)
+                closest_shoot_position = min(
+                    shoot_positions, key=lambda elem: graph.get_cell(x=elem[0], y=elem[1]).dist
+                )
                 closest_shoot_positions.append((enemy, closest_shoot_position))
 
         if not closest_shoot_positions:

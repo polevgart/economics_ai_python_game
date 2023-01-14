@@ -34,10 +34,7 @@ class GeneticAlgorithm:
         return tuple(range(self.population_size, 0, -1))
 
     def init_population(self):
-        return [
-            self.individual_factory()
-            for _ in range(self.population_size)
-        ]
+        return [self.individual_factory() for _ in range(self.population_size)]
 
     def run(self) -> Individual:
         population = self.init_population()
@@ -53,16 +50,18 @@ class GeneticAlgorithm:
 
     def crossover_phase(self, ranked_population: list[Individual]) -> list[Individual]:
         parents = random.choices(
-            ranked_population, weights=self.crossover_weights, k=self.num_of_children * 2
+            ranked_population,
+            weights=self.crossover_weights,
+            k=self.num_of_children * 2,
         )
-        paired_parents = zip(parents[:self.num_of_children], parents[self.num_of_children:])
-        return [
-            first.crossover(second) for first, second in paired_parents
-        ]
+        paired_parents = zip(parents[: self.num_of_children], parents[self.num_of_children :])
+        return [first.crossover(second) for first, second in paired_parents]
 
     def selection_phase(self, ranked_population, count):
         return random.choices(
-            ranked_population, weights=self.selection_weights, k=count
+            ranked_population,
+            weights=self.selection_weights,
+            k=count,
         )
 
     def mutation_phase(self, survivors: list[Individual]):

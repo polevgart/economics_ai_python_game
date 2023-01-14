@@ -33,13 +33,15 @@ class PygameInterface:
     dead_surf: pygame.Surface = attr.ib(default=None, init=False)
     empty_surf: pygame.Surface = attr.ib(default=None, init=False)
     wall_surf: pygame.Surface = attr.ib(default=None, init=False)
-    kind_bonus2surf: dict[type, dict[int: pygame.Surface]] = attr.ib(default=None, init=False)
+    kind_bonus2surf: dict[type, dict[int, pygame.Surface]] = attr.ib(default=None, init=False)
 
     @cell_size.default
     def _(self):
         return min(
-            (self.screen_width - 2 * self.border_x - self.border_between_cells * (self.board.size_x - 1)) // self.board.size_x,
-            (self.screen_height - 2 * self.border_y - self.border_between_cells * (self.board.size_y - 1)) // self.board.size_y
+            (self.screen_width - 2 * self.border_x - self.border_between_cells * (self.board.size_x - 1))
+            // self.board.size_x,
+            (self.screen_height - 2 * self.border_y - self.border_between_cells * (self.board.size_y - 1))
+            // self.board.size_y,
         )
 
     def load_cell_image(self, path):
@@ -55,18 +57,9 @@ class PygameInterface:
         self.empty_surf = self.load_cell_image("images/empty.png")
         self.wall_surf = self.load_cell_image("images/wall.png")
         self.kind_bonus2surf = {
-            HealBonus: {
-                value: self.load_cell_image(f"images/heal_x{value}.png")
-                for value in range(1, 4)
-            },
-            PoisonBonus: {
-                value: self.load_cell_image(f"images/poison_x{value}.png")
-                for value in range(1, 4)
-            },
-            ScoreBonus: {
-                value: self.load_cell_image(f"images/exp_x{value}.png")
-                for value in range(1, 4)
-            },
+            HealBonus: {value: self.load_cell_image(f"images/heal_x{value}.png") for value in range(1, 4)},
+            PoisonBonus: {value: self.load_cell_image(f"images/poison_x{value}.png") for value in range(1, 4)},
+            ScoreBonus: {value: self.load_cell_image(f"images/exp_x{value}.png") for value in range(1, 4)},
         }
 
     def start_loop(self):
@@ -124,11 +117,13 @@ class PygameInterface:
                     0,
                 )
                 pygame.draw.rect(
-                    surf, hp_color,
+                    surf,
+                    hp_color,
                     (5, self.cell_size - 15, int(hp_frac * (self.cell_size - 10)), 10),
                 )
                 pygame.draw.rect(
-                    surf, "black",
+                    surf,
+                    "black",
                     (5, self.cell_size - 15, self.cell_size - 10, 10),
                     width=1,
                 )

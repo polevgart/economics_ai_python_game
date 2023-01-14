@@ -32,7 +32,8 @@ def main():
 
     simulator = Simulator(
         board=board,
-        strategies=strategies or [
+        strategies=strategies
+        or [
             NeuralStrategy(player_name=board.player_names[0]),
             NeuralStrategy(player_name=board.player_names[1]),
             NeuralStrategy(player_name=board.player_names[2]),

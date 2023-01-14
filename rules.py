@@ -188,10 +188,7 @@ class Board:
             for line in file:
                 line = line.rstrip()
                 if line:
-                    row = [
-                        None if char == "." else Wall()
-                        for char in line
-                    ]
+                    row = [None if char == "." else Wall() for char in line]
                     self.cells.append(row)
 
         self.size_x = max(map(len, self.cells))
@@ -280,11 +277,15 @@ class Board:
 
 
 class Spawner:
-    items__probs = tuple(zip(*{
-        PoisonBonus: 1,
-        HealBonus: 2,
-        ScoreBonus: 5,
-    }.items()))
+    items__probs = tuple(
+        zip(
+            *{
+                PoisonBonus: 1,
+                HealBonus: 2,
+                ScoreBonus: 5,
+            }.items()
+        )
+    )
 
     @classmethod
     def spawn(cls) -> Item:

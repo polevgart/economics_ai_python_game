@@ -20,7 +20,7 @@ def act_relu(x: npt.ArrayLike) -> npt.ArrayLike:
 
 
 def act_sigmoid(x: npt.ArrayLike, eps: float = 1e-9) -> npt.ArrayLike:
-    neg_mask = (x < 0)
+    neg_mask = x < 0
     z = np.empty_like(x)
     z[neg_mask] = np.exp(x[neg_mask])
     z[~neg_mask] = np.exp(-x[~neg_mask])
@@ -44,10 +44,7 @@ class Perceptron:
     @weights.default
     def init_weights(self):
         layer_sizes = self.input_size, *self.hidden_layer_sizes, self.output_size
-        return [
-            self._xavier_init(shape)
-            for shape in zip(layer_sizes, layer_sizes[1:])
-        ]
+        return [self._xavier_init(shape) for shape in zip(layer_sizes, layer_sizes[1:])]
 
     def _xavier_init(self, shape: tuple[int, int]):
         fan_in, fan_out = shape
@@ -102,21 +99,20 @@ class NeuralStrategy(BaseStrategy, Individual):
         return move
 
     def mutate(self):
-        """Gaussian mutation with standard parameter values mu=0 and sigma=1
-        """
+        """Gaussian mutation with standard parameter values mu=0 and sigma=1"""
         prob = 0.1
         for layer in self.perceptron.weights:
             mask = np.random.random(layer.shape) < prob
             noise = np.random.normal(size=layer.shape, scale=1e-3)
             layer[mask] += noise[mask]
 
-    def crossover(self, other: 'NeuralStrategy') -> 'NeuralStrategy':
+    def crossover(self, other: "NeuralStrategy") -> "NeuralStrategy":
         eta = 10
         child = copy.deepcopy(self)
         for i, (layer, other_layer) in enumerate(zip(self.perceptron.weights, other.perceptron.weights)):
             rand = np.random.random(layer.shape)
-            beta = np.where(rand < 0.5, 2 * rand, 1. / (2 * (1 - rand)))
-            beta **= 1. / (eta + 1)
+            beta = np.where(rand < 0.5, 2 * rand, 1.0 / (2 * (1 - rand)))
+            beta **= 1.0 / (eta + 1)
             if lib_util.roll_dice(0.5):
                 layer, other_layer = other_layer, layer
             child.perceptron.weights[i] = ((1 + beta) * layer + (1 - beta) * other_layer) / 2
