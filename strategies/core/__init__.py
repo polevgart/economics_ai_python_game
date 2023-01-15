@@ -60,10 +60,12 @@ class BaseStrategy:
 
 
 @registry_strategy
+@attr.s(slots=True, kw_only=True)
 class RandomStrategy(BaseStrategy):
     def get_next_move(self, state: State) -> BaseMove:
         return random.choice(self._possible_moves)
 
 
+@attr.s(slots=True, kw_only=True)
 class ExceptionStrategy(BaseStrategy):
     pass

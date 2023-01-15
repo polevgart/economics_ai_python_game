@@ -38,7 +38,7 @@ def main():
             for _ in range(cnt):
                 player_name = next(gen_player_names)
                 named_strategy = copy.deepcopy(strategy)
-                named_strategy.player_namse = player_name
+                named_strategy.player_name = player_name
                 strategies.append(named_strategy)
 
     else:

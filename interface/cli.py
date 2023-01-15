@@ -1,4 +1,5 @@
 import attr
+import itertools
 
 from rules import Board, Bonus, Player
 from simulation import Simulator, TurnDescription
@@ -19,13 +20,9 @@ class CliInterface:
             self.render()
 
     def render_turn_desc(self, turn_desc: TurnDescription):
-        for player_name, shoot in turn_desc.shoots:
+        for player_name, move in itertools.chain(turn_desc.shoots, turn_desc.direct_moves):
             player = self.board.get_player(player_name)
-            print(f"Player(x={player.x}, y={player.y}) make move Shoot(dx={shoot.dx}, dy={shoot.dy})")
-
-        for player_name, direct_move in turn_desc.direct_moves:
-            player = self.board.get_player(player_name)
-            print(f"Player(x={player.x}, y={player.y}) make move DirectMove(dx={direct_move.dx}, dy={direct_move.dy})")
+            print(f"{player} make move {move}")
 
     def render(self):
         for y in range(self.board.size_y):
