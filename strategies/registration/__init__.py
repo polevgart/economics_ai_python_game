@@ -12,6 +12,7 @@ class Registrant:
 
         return self._participants[name]
 
+
 strategies_registrant = Registrant()
 
 

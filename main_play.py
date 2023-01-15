@@ -24,7 +24,11 @@ def main():
         fixed_players = sum(config["fixed_strategies"].values())
         max_players = len(board.player_names)
         if max_players > fixed_players:
-            logger.error("Config has different fixed_strategies and players on board: max players %s on board, you want players %s", max_players, fixed_players)
+            logger.error(
+                "Config has different fixed_strategies and players on board: max players %s on board, you want players %s",
+                max_players,
+                fixed_players,
+            )
             exit(1)
 
         gen_player_names = iter(board.player_names)

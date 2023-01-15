@@ -163,7 +163,9 @@ class Board:
 
     @player_names.default
     def _(self):
-        assert self.amount_of_players is not None, "Not defined amount_of_players and player_names for Board. You must define anything"
+        assert (
+            self.amount_of_players is not None
+        ), "Not defined amount_of_players and player_names for Board. You must define anything"
         return list(map(str, range(self.amount_of_players)))
 
     def __attrs_post_init__(self):
