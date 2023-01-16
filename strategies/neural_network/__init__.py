@@ -1,5 +1,5 @@
-from strategies.registration import registry_strategy
+from strategies.registration import register_strategy
 from .perceptron import NeuralStrategy
 
 
-registry_strategy(NeuralStrategy)
+register_strategy(NeuralStrategy)
