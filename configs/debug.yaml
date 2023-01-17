@@ -4,11 +4,15 @@ Board:
   num_of_items: 20
   max_health: 10
   level_map_path: "level_maps/level10x10.txt"
+  # num_of_players: 10
   player_names:
   - cock
   - shmara
   - david
   - guzeeva
+
+fixed_strategies:
+  RandomStrategy: 4
 
 PygameInterface:
   screen_width: 1000

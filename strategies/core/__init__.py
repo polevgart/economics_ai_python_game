@@ -2,7 +2,7 @@ import attr
 import random
 
 from rules import State
-
+from strategies.registration import register_strategy
 
 __all__ = (
     "BaseMove",
@@ -59,15 +59,13 @@ class BaseStrategy:
         raise NotImplementedError()
 
 
+@register_strategy
+@attr.s(slots=True, kw_only=True)
 class RandomStrategy(BaseStrategy):
     def get_next_move(self, state: State) -> BaseMove:
         return random.choice(self._possible_moves)
 
 
-class GreedyStrategy(BaseStrategy):
-    def get_next_move(self, state: State) -> BaseMove:
-        return random.choice(self._possible_moves)
-
-
+@attr.s(slots=True, kw_only=True)
 class ExceptionStrategy(BaseStrategy):
     pass

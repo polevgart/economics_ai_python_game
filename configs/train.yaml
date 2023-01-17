@@ -4,6 +4,7 @@ Board:
   num_of_items: 10
   max_health: 10
   level_map_path: "level_maps/level10x10.txt"
+  # num_of_players: 10
   player_names:
   - cock
   - shmara
